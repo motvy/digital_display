@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QSize, QTimer
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QWidget, QMessageBox, QComboBox
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QWidget, QMessageBox, QComboBox, QLineEdit
 
 import serial
 
@@ -25,6 +25,18 @@ class MainWindow(QWidget):
         
         QPushButton {
             font-size: 12pt;
+        }
+        QTableWidget {
+            border: 0px;
+            background-color: #F0F0F0;
+        }
+        QHeaderView::section {
+            background-color: transparent;
+            font-size: 12pt;
+            border: 0px;
+        }
+        QHeaderView {
+            background-color: transparent;
         }
         """
         self.setStyleSheet(stylesheet)
@@ -60,7 +72,7 @@ class MainWindow(QWidget):
         self.graph_canvas = plot_canvas.GraphCanvas(self)
 
         main_lt = QVBoxLayout()
-        main_lt.addWidget(self.graph_canvas.frame)
+        main_lt.addLayout(self.graph_canvas.layout)
         main_lt.addWidget(control_frame)
 
         self.setLayout(main_lt)
@@ -112,9 +124,10 @@ class MainWindow(QWidget):
                 
                 print(f'Получение данных от МК.. {i}')
                 i += 1
-                data += bin(int.from_bytes(line)).split('0b')[-1].zfill(8)
+                data += bin(int.from_bytes(line)).split('0b')[-1].zfill(len(line)*8)
+                table_data = [hex(d) for d in line]
             
             if data:
                 self.stop_timer()
-                self.graph_canvas.go_plot(data)
+                self.graph_canvas.go_plot(data, table_data)
 
